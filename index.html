@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OANDA Investment</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #007BFF;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: #fff;
+            color: #007BFF;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 40px 10px;
+            }
+
+            section {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>OANDA Investment</h1>
+        <p>Your future starts here. Invest wisely!</p>
+    </header>
+
+    <section id="signup-section">
+        <h2>Sign Up</h2>
+        <form id="signup-form" onsubmit="return handleSignup(event)">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit" class="btn">Create Account</button>
+        </form>
+    </section>
+
+    <section id="account-section" style="display: none;">
+        <h2>Your Account</h2>
+        <p>Balance: <span id="balance">$0.00</span></p>
+        <button class="btn" onclick="deposit()">Deposit</button>
+        <button class="btn" onclick="withdraw()">Withdraw</button>
+
+        <h3>Investment Plans</h3>
+        <ul>
+            <li>Plan A: 5% Monthly Return</li>
+            <li>Plan B: 10% Monthly Return</li>
+            <li>Plan C: 15% Monthly Return</li>
+        </ul>
+        <button class="btn" onclick="logout()">Logout</button>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 OANDA Investment. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Simulated user data storage
+        let users = [];
+        let currentUser  = null;
+
+        // Handle sign-up form submission
+        function handleSignup(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Simulate user registration
+            const newUser  = { name, email, password, balance: 0 };
+            users.push(newUser );
+            currentUser  = newUser ; // Set the current user
+
+            // Show account section and hide signup section
+            document.getElementById('signup-section').style.display = 'none';
+            document.getElementById('account-section').style.display = 'block';
+            updateBalance();
+        }
+
+        // Simulate deposit action
+        function deposit() {
+            const amount = prompt("Enter amount to deposit:");
+            if (amount && !
