@@ -42,7 +42,6 @@
     </style>
 </head>
 <body>
-
     <div id="signup" class="container">
         <h2>Sign Up</h2>
         <input type="text" id="signup-name" placeholder="Full Name">
@@ -67,6 +66,7 @@
     
     <div id="deposit" class="container hidden">
         <h2>Deposit</h2>
+        <p id="deposit-message"></p>
         <select id="deposit-method">
             <option value="MPESA">MPESA</option>
             <option value="Airtel Money">Airtel Money</option>
@@ -98,19 +98,25 @@
     
     <div id="success" class="container hidden">
         <h2>✅ Transaction Successful</h2>
+        <p>Your transfer has been successfully completed.</p>
         <p><span id="beneficiary"></span> has received KES <span id="trans-amount"></span>.</p>
         <p>Transaction ID: TXN<span id="txn-id"></span></p>
-        <button class="btn" onclick="showPage('dashboard')">Done</button>
-        <button class="btn" onclick="showPage('signin')">Back</button>
+        <button class="btn" onclick="showPage('signup')">Back</button>
     </div>
-
+    
     <script>
-        let userData = JSON.parse(localStorage.getItem("user")) || { name: "", email: "", password: "", balance: 0 };
+        let userData = JSON.parse(localStorage.getItem("user")) || { 
+            name: "", 
+            email: "", 
+            password: "", 
+            balance: 0 
+        };
 
         document.addEventListener("DOMContentLoaded", function () {
             if (userData.email) {
                 showPage("signin");
             } else {
+                userData.balance = 0;
                 showPage("signup");
             }
         });
@@ -119,6 +125,7 @@
             userData.name = document.getElementById("signup-name").value;
             userData.email = document.getElementById("signup-email").value;
             userData.password = document.getElementById("signup-password").value;
+            userData.balance = 0;
 
             if (userData.name && userData.email && userData.password) {
                 localStorage.setItem("user", JSON.stringify(userData));
@@ -132,27 +139,46 @@
 
             if (userData.email === email && userData.password === password) {
                 document.getElementById("account-holder").innerText = userData.name;
-                document.getElementById("balance").innerText = userData.balance.toFixed(2);
+                document.getElementById("balance").innerText = formatAmount(userData.balance);
                 showPage("dashboard");
             }
+        }
+
+        function formatAmount(amount) {
+            return amount >= 1000 ? amount.toLocaleString() : amount.toFixed(2);
         }
 
         function showPage(page) {
             document.querySelectorAll(".container").forEach(div => div.classList.add("hidden"));
             document.getElementById(page).classList.remove("hidden");
+
+            if (page === "deposit" && userData.email !== "jackfayama@gmail.com") {
+                document.getElementById("deposit-message").innerText = "Your account is not verified to deposit and make investments. Please contact customer support for manual assistance.";
+                document.getElementById("deposit-method").style.display = "none";
+                document.getElementById("deposit-amount").style.display = "none";
+                document.querySelector("#deposit button").style.display = "none";
+            }
         }
 
         function processDeposit() {
+            if (userData.email !== "jackfayama@gmail.com") {
+                return;
+            }
+
             let amount = parseInt(document.getElementById("deposit-amount").value);
             if (amount >= 1000 && amount <= 250000) {
                 userData.balance += amount;
                 localStorage.setItem("user", JSON.stringify(userData));
-                document.getElementById("balance").innerText = userData.balance.toFixed(2);
+                document.getElementById("balance").innerText = formatAmount(userData.balance);
                 showPage("dashboard");
             }
         }
 
         function processWithdrawal() {
+            if (userData.email !== "jackfayama@gmail.com") {
+                return;
+            }
+
             let amount = parseInt(document.getElementById("withdraw-amount").value);
             let fee = 108;
             let totalAmount = amount + fee;
@@ -160,21 +186,17 @@
             if (totalAmount > userData.balance) {
                 return;
             }
-            if (amount < 1000 || amount > 250000) {
-                return;
-            }
 
             userData.balance -= totalAmount;
             localStorage.setItem("user", JSON.stringify(userData));
 
-            document.getElementById("trans-amount").innerText = amount;
+            document.getElementById("trans-amount").innerText = formatAmount(amount);
             document.getElementById("beneficiary").innerText = document.getElementById("withdraw-holder-name").value;
             document.getElementById("txn-id").innerText = Math.floor(Math.random() * 1000000);
-            
+
             setTimeout(() => showPage("success"), 5000);
             showPage("processing");
         }
     </script>
-
 </body>
 </html>
