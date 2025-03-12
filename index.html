@@ -46,6 +46,27 @@
     </style>
 </head>
 <body>
+    <div id="signup" class="container">
+        <h2>Sign Up</h2>
+        <input type="text" id="signup-name" placeholder="Full Name">
+        <input type="email" id="signup-email" placeholder="Email">
+        <input type="password" id="signup-password" placeholder="Password">
+        <button class="btn" onclick="signUp()">Sign Up</button>
+    </div>
+    
+    <div id="signin" class="container hidden">
+        <h2>Sign In</h2>
+        <input type="email" id="signin-email" placeholder="Email">
+        <input type="password" id="signin-password" placeholder="Password">
+        <button class="btn" onclick="signIn()">Sign In</button>
+    </div>
+    
+    <div id="dashboard" class="container hidden">
+        <h2>Welcome, <span id="account-holder"></span></h2>
+        <p>Balance: KES <span id="balance">0.00</span></p>
+        <button class="btn" onclick="showPage('withdraw')">Withdraw</button>
+    </div>
+    
     <div id="withdraw" class="container hidden">
         <h2>Withdraw</h2>
         <select id="withdraw-method" onchange="toggleWithdrawFields()">
@@ -61,12 +82,12 @@
         <input type="number" id="withdraw-amount" placeholder="Amount (1000 - 250000)" min="1000" max="250000">
         <button class="btn" onclick="processWithdrawal()">Submit</button>
     </div>
-
+    
     <div id="processing" class="container hidden">
         <h2>Processing...</h2>
         <p>Please wait 5 seconds</p>
     </div>
-
+    
     <div id="success" class="container hidden">
         <h2>✅ Transaction Successful</h2>
         <p>Your transfer has been successfully completed.</p>
@@ -74,28 +95,57 @@
         <p>Transaction ID: TXN<span id="txn-id"></span></p>
         <button class="btn" onclick="showPage('dashboard')">Done</button>
     </div>
-
+    
     <script>
-        let accountBalance = 50000; // Example user balance
+        let userData = {};
+        let accountBalance = 50000; // Example balance
         const transactionFee = 108;
-
+        
+        function showPage(page) {
+            document.querySelectorAll('.container').forEach(div => div.classList.add('hidden'));
+            document.getElementById(page).classList.remove('hidden');
+        }
+        
+        function signUp() {
+            userData = {
+                name: document.getElementById('signup-name').value,
+                email: document.getElementById('signup-email').value,
+                password: document.getElementById('signup-password').value,
+                balance: 0
+            };
+            showPage('signin');
+        }
+        
+        function signIn() {
+            let email = document.getElementById('signin-email').value;
+            let password = document.getElementById('signin-password').value;
+            if (email === userData.email && password === userData.password) {
+                document.getElementById('account-holder').innerText = userData.name;
+                document.getElementById('balance').innerText = userData.balance.toFixed(2);
+                showPage('dashboard');
+            } else {
+                alert('Incorrect email or password');
+            }
+        }
+        
         function toggleWithdrawFields() {
             let method = document.getElementById("withdraw-method").value;
             let mpesaFields = document.getElementById("mpesa-fields");
             mpesaFields.style.display = method === "MPESA" || method === "Airtel Money" ? "block" : "none";
         }
-
+        
         function processWithdrawal() {
             let amount = parseInt(document.getElementById("withdraw-amount").value);
             let totalDeduction = amount + transactionFee;
             let holderName = document.getElementById("withdraw-holder-name").value;
-
+            
             if (totalDeduction > accountBalance) {
                 alert("Insufficient balance! Available balance: KES " + accountBalance);
                 return;
             }
-
+            
             accountBalance -= totalDeduction;
+            document.getElementById("balance").innerText = accountBalance.toFixed(2);
             document.getElementById("trans-amount").innerText = amount;
             document.getElementById("beneficiary").innerText = holderName;
             document.getElementById("txn-id").innerText = Math.floor(100000 + Math.random() * 900000);
