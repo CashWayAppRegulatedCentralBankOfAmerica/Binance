@@ -42,28 +42,95 @@
             text-decoration: none;
             color: #2E8B57;
         }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div id="main-container" class="container">
         <h2>Welcome to GreenCash</h2>
-        <button class="btn" onclick="location.href='signup.html'">Sign Up</button>
-        <button class="btn" onclick="location.href='login.html'">Login</button>
+        <button class="btn" onclick="showPage('signup')">Sign Up</button>
+        <button class="btn" onclick="showPage('login')">Login</button>
+    </div>
+
+    <div id="signup" class="container hidden">
+        <h2>Sign Up</h2>
+        <input type="text" id="name" placeholder="Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn" onclick="signup()">Sign Up</button>
+    </div>
+
+    <div id="login" class="container hidden">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email">
+        <input type="password" id="login-password" placeholder="Password">
+        <button class="btn" onclick="login()">Login</button>
+    </div>
+
+    <div id="dashboard" class="container hidden">
+        <h2>Account Dashboard</h2>
+        <p>Welcome, <span id="account-name"></span></p>
+        <p>Balance: KES <span id="account-balance">0.00</span></p>
+        <button class="btn" onclick="showPage('deposit')">Deposit</button>
+        <button class="btn" onclick="showPage('withdraw')">Withdraw</button>
+    </div>
+
+    <div id="deposit" class="container hidden">
+        <h2>Deposit</h2>
+        <select id="payment-method">
+            <option value="MPESA">MPESA</option>
+            <option value="Airtel Money">Airtel Money</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Bank">Bank</option>
+        </select>
+        <input type="text" id="phone" placeholder="Phone Number (0712345678)">
+        <input type="text" id="holder-name" placeholder="Account Holder Name">
+        <input type="number" id="amount" placeholder="Amount (1000 - 250000)" min="1000" max="250000">
+        <button class="btn" onclick="processTransaction('deposit')">Submit</button>
+    </div>
+
+    <div id="withdraw" class="container hidden">
+        <h2>Withdraw</h2>
+        <select id="withdraw-method">
+            <option value="MPESA">MPESA</option>
+            <option value="Airtel Money">Airtel Money</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Bank">Bank</option>
+        </select>
+        <input type="number" id="withdraw-amount" placeholder="Amount (1000 - 250000)" min="1000" max="250000">
+        <button class="btn" onclick="processTransaction('withdraw')">Submit</button>
+    </div>
+
+    <div id="processing" class="container hidden">
+        <h2>Processing...</h2>
+        <p>Please wait 5 seconds</p>
+    </div>
+
+    <div id="success" class="container hidden">
+        <h2>✅ Transaction Successful</h2>
+        <p>Your transfer has been successfully completed.</p>
+        <p><span id="beneficiary"></span> has received KES <span id="trans-amount"></span>.</p>
+        <p>Transaction ID: TXN<span id="txn-id"></span></p>
+        <button class="btn" onclick="showPage('dashboard')">Done</button>
     </div>
 
     <script>
-        let users = [];
+        function showPage(page) {
+            document.querySelectorAll('.container').forEach(div => div.classList.add('hidden'));
+            document.getElementById(page).classList.remove('hidden');
+        }
 
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        
         function signup() {
             let name = document.getElementById("name").value;
             let email = document.getElementById("email").value;
             let password = document.getElementById("password").value;
-            
             if (name && email && password) {
                 users.push({ name, email, password, balance: 0 });
                 localStorage.setItem("users", JSON.stringify(users));
-                alert("Signup successful! Please login.");
-                location.href = 'login.html';
+                alert("Signup successful!");
+                showPage('login');
             } else {
                 alert("All fields are required!");
             }
@@ -72,15 +139,26 @@
         function login() {
             let email = document.getElementById("login-email").value;
             let password = document.getElementById("login-password").value;
-            users = JSON.parse(localStorage.getItem("users")) || [];
-            
             let user = users.find(u => u.email === email && u.password === password);
             if (user) {
                 localStorage.setItem("currentUser", JSON.stringify(user));
-                location.href = 'dashboard.html';
+                document.getElementById("account-name").innerText = user.name;
+                document.getElementById("account-balance").innerText = user.balance;
+                showPage('dashboard');
             } else {
-                alert("Invalid email or password!");
+                alert("Invalid credentials!");
             }
+        }
+
+        function processTransaction(type) {
+            showPage('processing');
+            setTimeout(() => {
+                let amount = type === 'deposit' ? document.getElementById("amount").value : document.getElementById("withdraw-amount").value;
+                document.getElementById("trans-amount").innerText = amount;
+                document.getElementById("beneficiary").innerText = JSON.parse(localStorage.getItem("currentUser")).name;
+                document.getElementById("txn-id").innerText = Math.floor(Math.random() * 1000000);
+                showPage('success');
+            }, 5000);
         }
     </script>
 </body>
