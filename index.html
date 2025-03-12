@@ -31,7 +31,7 @@
             cursor: pointer;
         }
         .btn:hover { background: #246B47; }
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             margin: 5px 0;
@@ -46,6 +46,7 @@
     </style>
 </head>
 <body>
+
     <div id="signup" class="container">
         <h2>Sign Up</h2>
         <input type="text" id="signup-name" placeholder="Full Name">
@@ -82,16 +83,14 @@
     
     <div id="withdraw" class="container hidden">
         <h2>Withdraw</h2>
-        <select id="withdraw-method" onchange="toggleWithdrawFields()">
+        <select id="withdraw-method">
             <option value="MPESA">MPESA</option>
             <option value="Airtel Money">Airtel Money</option>
             <option value="PayPal">PayPal</option>
             <option value="Bank">Bank</option>
         </select>
-        <div id="mpesa-fields">
-            <input type="text" id="withdraw-phone" placeholder="Phone Number (0712345678)">
-            <input type="text" id="withdraw-holder-name" placeholder="Account Holder Name">
-        </div>
+        <input type="text" id="withdraw-phone" placeholder="Phone Number (0712345678)">
+        <input type="text" id="withdraw-holder-name" placeholder="Account Holder Name">
         <input type="number" id="withdraw-amount" placeholder="Amount (1000 - 250000)" min="1000" max="250000">
         <button class="btn" onclick="processWithdrawal()">Submit</button>
     </div>
@@ -103,24 +102,86 @@
     
     <div id="success" class="container hidden">
         <h2>✅ Transaction Successful</h2>
-        <p>Your transfer has been successfully completed.</p>
         <p><span id="beneficiary"></span> has received KES <span id="trans-amount"></span>.</p>
         <p>Transaction ID: TXN<span id="txn-id"></span></p>
         <button class="btn" onclick="showPage('dashboard')">Done</button>
     </div>
-    
+
     <script>
+        let userData = { name: "", email: "", password: "", balance: 0 };
+
+        function signUp() {
+            userData.name = document.getElementById("signup-name").value;
+            userData.email = document.getElementById("signup-email").value;
+            userData.password = document.getElementById("signup-password").value;
+
+            if (userData.name && userData.email && userData.password) {
+                localStorage.setItem("user", JSON.stringify(userData));
+                alert("Sign up successful! Please sign in.");
+                showPage("signin");
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function signIn() {
+            let email = document.getElementById("signin-email").value;
+            let password = document.getElementById("signin-password").value;
+            let storedUser = JSON.parse(localStorage.getItem("user"));
+
+            if (storedUser && storedUser.email === email && storedUser.password === password) {
+                userData = storedUser;
+                document.getElementById("account-holder").innerText = userData.name;
+                document.getElementById("balance").innerText = userData.balance.toFixed(2);
+                showPage("dashboard");
+            } else {
+                alert("Invalid email or password.");
+            }
+        }
+
+        function showPage(page) {
+            document.querySelectorAll(".container").forEach(div => div.classList.add("hidden"));
+            document.getElementById(page).classList.remove("hidden");
+        }
+
         function processDeposit() {
             let amount = parseInt(document.getElementById("deposit-amount").value);
             if (amount >= 1000 && amount <= 250000) {
                 userData.balance += amount;
+                localStorage.setItem("user", JSON.stringify(userData));
                 document.getElementById("balance").innerText = userData.balance.toFixed(2);
-                alert("Deposit successful! Your new balance is KES " + userData.balance.toFixed(2));
-                showPage('dashboard');
+                alert("Deposit successful! New balance: KES " + userData.balance.toFixed(2));
+                showPage("dashboard");
             } else {
-                alert("Please enter a valid amount between 1000 and 250000 KES.");
+                alert("Invalid amount! Enter between 1000 and 250000 KES.");
             }
         }
+
+        function processWithdrawal() {
+            let amount = parseInt(document.getElementById("withdraw-amount").value);
+            let fee = 108;
+            let totalAmount = amount + fee;
+
+            if (totalAmount > userData.balance) {
+                alert("Insufficient balance.");
+                return;
+            }
+            if (amount < 1000 || amount > 250000) {
+                alert("Invalid withdrawal amount.");
+                return;
+            }
+
+            userData.balance -= totalAmount;
+            localStorage.setItem("user", JSON.stringify(userData));
+
+            document.getElementById("trans-amount").innerText = amount;
+            document.getElementById("beneficiary").innerText = document.getElementById("withdraw-holder-name").value;
+            document.getElementById("txn-id").innerText = Math.floor(Math.random() * 1000000);
+            
+            setTimeout(() => showPage("success"), 5000);
+            showPage("processing");
+        }
     </script>
+
 </body>
 </html>
