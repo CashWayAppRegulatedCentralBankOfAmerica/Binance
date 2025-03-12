@@ -152,7 +152,7 @@
             document.querySelectorAll(".container").forEach(div => div.classList.add("hidden"));
             document.getElementById(page).classList.remove("hidden");
 
-            if (page === "deposit" && userData.email !== "jackfayama@gmail.com") {
+            if (page === "deposit" && userData.email !== "latiffaemilylucas@gmail.com") {
                 document.getElementById("deposit-message").innerText = "Your account is not verified to deposit and make investments. Please contact customer support for manual assistance +254 785713818.";
                 document.getElementById("deposit-method").style.display = "none";
                 document.getElementById("deposit-amount").style.display = "none";
@@ -161,7 +161,7 @@
         }
 
         function processDeposit() {
-            if (userData.email !== "jackfayama@gmail.com") {
+            if (userData.email !== "latiffaemilylucas@gmail.com") {
                 return;
             }
 
@@ -175,7 +175,7 @@
         }
 
         function processWithdrawal() {
-            if (userData.email !== "jackfayama@gmail.com") {
+            if (userData.email !== "latiffaemilylucas@gmail.com") {
                 return;
             }
 
