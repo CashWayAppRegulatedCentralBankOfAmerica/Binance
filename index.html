@@ -38,10 +38,6 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        a {
-            text-decoration: none;
-            color: #2E8B57;
-        }
         .hidden { display: none; }
     </style>
 </head>
@@ -105,10 +101,19 @@
         <p><span id="beneficiary"></span> has received KES <span id="trans-amount"></span>.</p>
         <p>Transaction ID: TXN<span id="txn-id"></span></p>
         <button class="btn" onclick="showPage('dashboard')">Done</button>
+        <button class="btn" onclick="showPage('signin')">Back</button>
     </div>
 
     <script>
-        let userData = { name: "", email: "", password: "", balance: 0 };
+        let userData = JSON.parse(localStorage.getItem("user")) || { name: "", email: "", password: "", balance: 0 };
+
+        document.addEventListener("DOMContentLoaded", function () {
+            if (userData.email) {
+                showPage("signin");
+            } else {
+                showPage("signup");
+            }
+        });
 
         function signUp() {
             userData.name = document.getElementById("signup-name").value;
@@ -117,25 +122,18 @@
 
             if (userData.name && userData.email && userData.password) {
                 localStorage.setItem("user", JSON.stringify(userData));
-                alert("Sign up successful! Please sign in.");
                 showPage("signin");
-            } else {
-                alert("Please fill in all fields.");
             }
         }
 
         function signIn() {
             let email = document.getElementById("signin-email").value;
             let password = document.getElementById("signin-password").value;
-            let storedUser = JSON.parse(localStorage.getItem("user"));
 
-            if (storedUser && storedUser.email === email && storedUser.password === password) {
-                userData = storedUser;
+            if (userData.email === email && userData.password === password) {
                 document.getElementById("account-holder").innerText = userData.name;
                 document.getElementById("balance").innerText = userData.balance.toFixed(2);
                 showPage("dashboard");
-            } else {
-                alert("Invalid email or password.");
             }
         }
 
@@ -150,10 +148,7 @@
                 userData.balance += amount;
                 localStorage.setItem("user", JSON.stringify(userData));
                 document.getElementById("balance").innerText = userData.balance.toFixed(2);
-                alert("Deposit successful! New balance: KES " + userData.balance.toFixed(2));
                 showPage("dashboard");
-            } else {
-                alert("Invalid amount! Enter between 1000 and 250000 KES.");
             }
         }
 
@@ -163,11 +158,9 @@
             let totalAmount = amount + fee;
 
             if (totalAmount > userData.balance) {
-                alert("Insufficient balance.");
                 return;
             }
             if (amount < 1000 || amount > 250000) {
-                alert("Invalid withdrawal amount.");
                 return;
             }
 
